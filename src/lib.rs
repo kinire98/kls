@@ -19,4 +19,11 @@ It uses binary bits for each attribute
 for example if is a hidden dir it would be:
 is dir -> 16 + hidden -> 2 = 18 -> hidden dir
 128 cannot be mixed
+
+
+
+For linux there is a crate file_mode:
+https://docs.rs/file-mode/latest/file_mode/
+https://crates.io/crates/file-mode
+Saves me
 */
