@@ -1,46 +1,64 @@
-use std::{fs, path::PathBuf};
-#[cfg(windows)]
-use std::os::windows::prelude::*;
-#[cfg(unix)]
-use std::os::linux::fs::MetadataExt;
+use std::path::PathBuf;
 use clap::*;
-
 use std::env::current_dir;
+use kls::error::Result;
 
-#[derive(Parser)]
-struct Args {
-    path: Option<PathBuf>
+
+
+#[derive(Parser, Debug)]
+/// If conflicting options it will apply the minimal one
+pub struct Arguments {
+    /// Specified path, if empty the default would be the current dir
+    path: Option<PathBuf>,
+    /// Do not ignore entries starting with .
+    #[arg(short='a')]
+    all: bool,
+    /// Do not list implied . and ..
+    #[arg(short='A')]
+    almost_all: bool,
+    /// Author of the file (might come as an ID)
+    #[arg(long)]
+    author: bool, 
+    /// Ignore files ending with ~
+    #[arg(short='b')]
+    ignore_backups: bool,
+    /// Lists only directories
+    #[arg(short='d')]
+    directories: bool,
+    /// Long listing
+    #[arg(short='l')]
+    long_listing: bool,
+    /// Lists subdirectories recursively (can crash in case of file structure being too deep)
+    #[arg(short='r')]
+    recursive: bool, 
+    /// Prints the size of the file
+    #[arg(short='s')]
+    size: bool,
 }
-
-
-
-fn main() {
-    let args = Args::parse();
-    let mut path = if let Some(x) = args.path {
-        x
-    } else {
-        PathBuf::new()
-    };
-    if path == PathBuf::new() {
-        path = current_dir().unwrap();
+impl Arguments {
+    fn to_tuple(&self) -> (Option<PathBuf>, bool, bool, bool, bool, bool, bool, bool, bool) {
+        (self.path.clone(), self.all, self.almost_all, self.author, self.ignore_backups, self.directories, self.long_listing, self.recursive, self.size)
     }
-    println!("{:?}", path);
-    
-    let thing = std::fs::read_dir(path).unwrap();
-    for path in thing {
-        let jeje = path.unwrap().path().display().to_string();
-        let metadata = fs::metadata(jeje.clone()).unwrap();
-        #[cfg(windows)]
-        {
-            let atts = metadata.file_attributes();
-            let file_size = metadata.file_size();
-            println!("{}: {:?}, {:?}",jeje,  atts, file_size);
-        }
-        #[cfg(unix)]
-        {
-            let atts = metadata.file_type();
-            let file_size = metadata.st_blocks();
-            println!("{}: {:?}, {:?}",jeje,  atts, file_size);
-        }
+}
+/*
+? Flags to implement
+  -a, --all                  do not ignore entries starting with .
+  -A, --almost-all           do not list implied . and ..
+      --author               with -l, print the author of each file
+  -B, --ignore-backups       do not list implied entries ending with ~
+  -d, --directory            list directories themselves, not their contents
+  -l                         use a long listing format
+  -R, --recursive            list subdirectories recursively
+  -s, --size                 print the allocated size of each file, in blocks
+*/
+
+
+fn main() -> Result<()> {
+    let mut args = Arguments::parse();
+    if args.path.is_none() {
+        args.path = Some(current_dir().unwrap());
     }
+    let mut tree = kls::Dir::from(args.to_tuple());
+    tree.print()?;
+    Ok(())
 }
