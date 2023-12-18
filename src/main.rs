@@ -11,33 +11,30 @@ pub struct Arguments {
     /// Specified path, if empty the default would be the current dir
     path: Option<PathBuf>,
     /// Do not ignore entries starting with .
-    #[arg(short='a')]
+    #[arg(short='a', long)]
     all: bool,
     /// Do not list implied . and ..
-    #[arg(short='A')]
+    #[arg(short='A', long)]
     almost_all: bool,
-    /// Author of the file (might come as an ID)
-    #[arg(long)]
-    author: bool, 
     /// Ignore files ending with ~
-    #[arg(short='b')]
+    #[arg(short='b', long)]
     ignore_backups: bool,
     /// Lists only directories
-    #[arg(short='d')]
+    #[arg(short='d', long)]
     directories: bool,
     /// Long listing
     #[arg(short='l')]
     long_listing: bool,
-    /// Lists subdirectories recursively (can crash in case of file structure being too deep)
-    #[arg(short='r')]
-    recursive: bool, 
-    /// Prints the size of the file
-    #[arg(short='s')]
+    /// Prints the size of the file (in bytes)
+    #[arg(short='s', long)]
     size: bool,
+    /// Lists subdirectories recursively (max 255)
+    #[arg(short='r', long, default_value="0",)]
+    recursive: u8, 
 }
 impl Arguments {
-    fn to_tuple(&self) -> (Option<PathBuf>, bool, bool, bool, bool, bool, bool, bool, bool) {
-        (self.path.clone(), self.all, self.almost_all, self.author, self.ignore_backups, self.directories, self.long_listing, self.recursive, self.size)
+    fn to_tuple(&self) -> (Option<PathBuf>, bool, bool, bool, bool, bool, bool, u8) {
+        (self.path.clone(), self.all, self.almost_all, self.ignore_backups, self.directories, self.long_listing, self.size, self.recursive)
     }
 }
 /*
@@ -58,7 +55,7 @@ fn main() -> Result<()> {
     if args.path.is_none() {
         args.path = Some(current_dir().unwrap());
     }
-    let mut tree = kls::Dir::from(args.to_tuple());
-    tree.print()?;
+    let mut dir = kls::Dir::from(args.to_tuple());
+    dir.print()?;
     Ok(())
 }

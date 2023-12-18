@@ -8,13 +8,13 @@ https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html#tymethod.file
 
 
 #[cfg(unix)]
-mod unix;
+pub mod unix;
 
 #[cfg(unix)]
 pub use unix::*;
 
 #[cfg(windows)]
-mod windows;
-
+pub mod windows;
+// 
 #[cfg(windows)]
 pub use windows::*;
