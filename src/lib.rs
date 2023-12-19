@@ -69,7 +69,7 @@ impl Dir {
         if recursion_times == 0 {
             return Ok(());
         }
-        std::fs::read_dir(path).unwrap().into_iter().for_each(|child_path| {
+        std::fs::read_dir(path).unwrap().for_each(|child_path| {
             self.print_recursive(child_path.unwrap().path(), recursion_times - 1).unwrap();
         });
         Ok(())
@@ -80,13 +80,13 @@ impl Dir {
             print!("{} ", ".".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
             print!("{} ", "..".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
         }
-        std::fs::read_dir(parent_path.clone()).unwrap().into_iter().for_each(|child_path| {
+        std::fs::read_dir(parent_path.clone()).unwrap().for_each(|child_path| {
             let path = match child_path {
                 Ok(path) => path.path(),
                 Err(_) => todo!(),
             };
             let length_of_parent_path = parent_path.display().to_string().len() + 1;
-            let mut to_print = path.clone().display().to_string();
+            let mut to_print = path.display().to_string();
             if to_print.ends_with('~') && self.ignore_backups {
                 return;
             }
