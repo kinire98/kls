@@ -39,10 +39,8 @@ impl MetadataPath {
         let meta = fs::metadata(self.path.clone()).unwrap();
         let gid = Self::parse_passwd_gid(meta.gid());
         let uid = Self::parse_passwd_uid(meta.uid());
-        let d = UNIX_EPOCH + Duration::from_secs(meta.mtime().try_into().unwrap());
-        let datetime = DateTime::<Utc>::from(d);
-        let timestamp_str = datetime.format("%Y-%m-%d %H:%M").to_string();
-        format!("{} {} {} {}", permissions, uid, gid, timestamp_str)
+        let date = Self::get_date(meta.mtime().try_into().unwrap());
+        format!("{} {} {} {}", permissions, uid, gid, date)
     }
     fn parse_passwd_uid(uid: u32) -> String {
         let etc_passwd = fs::read_to_string("/etc/passwd").unwrap();
@@ -69,5 +67,10 @@ impl MetadataPath {
                                                         .stdout)
                                                         .to_string();
         output.split(':').collect::<Vec<&str>>()[0].to_string()
+    }
+    fn get_date(unix_time: u64) -> String {
+        let d = UNIX_EPOCH + Duration::from_secs(unix_time);
+        let datetime = DateTime::<Utc>::from(d);
+        datetime.format("%Y-%m-%d %H:%M").to_string()
     }
 }
