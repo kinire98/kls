@@ -77,8 +77,8 @@ impl Dir {
     fn print_dir(&self, parent_path: PathBuf) -> Result<()> {
         println!("{}", parent_path.display().to_string().on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
         if self.all {
-            print!("{} ", ".".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
-            print!("{} ", "..".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
+            print!("{} {}", ".".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing { "\n" } else { "" });
+            print!("{} {}", "..".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing { "\n" } else { "" });
         }
         std::fs::read_dir(parent_path.clone()).unwrap().for_each(|child_path| {
             let path = match child_path {
