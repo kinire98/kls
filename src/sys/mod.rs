@@ -2,7 +2,6 @@
 /*
 ? To investigate properties
 https://doc.rust-lang.org/std/fs/struct.Metadata.html
-https://doc.rust-lang.org/std/os/windows/fs/trait.MetadataExt.html#tymethod.file_attributes
 
 */
 

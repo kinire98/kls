@@ -7,9 +7,6 @@ https://doc.rust-lang.org/std/os/unix/fs/trait.MetadataExt.html
 Saves me
 */
 
-extern crate chrono;
-use chrono::prelude::DateTime;
-use chrono::Utc;
 
 use file_mode::ModePath;
 
