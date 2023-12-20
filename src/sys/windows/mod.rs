@@ -122,48 +122,48 @@ impl Props {
         let mut clone = props;
         let mut props = props;
         let mut read_only = false;
-        props = props >> 1;
-        props = props << 1;
+        props >>= 1;
+        props <<= 1;
         if props != clone {
             read_only = true;
         }
-        props = props >> 1;
-        clone = clone >> 1;
+        props >>= 1;
+        clone >>= 1;
         let mut hidden = false;
-        props = props >> 1;
-        props = props << 1;
+        props >>= 1;
+        props <<= 1;
         if props != clone {
             hidden = true;
         }
-        props = props >> 1;
-        clone = clone >> 1;
+        props >>= 1;
+        clone >>= 1;
         let mut system = false;
-        props = props >> 1;
-        props = props << 1;
+        props >>= 1;
+        props <<= 1;
         if props != clone {
             system = true;
         }
-        props = props >> 2;
-        clone = clone >> 2;
+        props >>= 2;
+        clone >>= 2;
         let mut dir = false;
-        props = props >> 1;
-        props = props << 1;
+        props >>= 1;
+        props <<= 1;
         if props != clone {
             dir = true;
         }
-        props = props >> 1;
-        clone = clone >> 1;
+        props >>= 1;
+        clone >>= 1;
         let mut file = false; 
-        props = props >> 1;
-        props = props << 1;
+        props >>= 1;
+        props <<= 1;
         if props != clone && !dir {
             file = true;
         }
-        props = props >> 4;
+        props >>= 4;
         clone = props >> 4;
         let mut sparse_file = false;
-        props = props >> 1;
-        props = props << 1;
+        props >>= 1;
+        props <<= 1;
         if props != clone {
             sparse_file = true;
         }

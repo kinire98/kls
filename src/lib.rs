@@ -86,7 +86,7 @@ impl Dir {
             self.print_file(".".into())?;
             self.print_file("..".into())?;
         }
-        std::fs::read_dir(parent_path.clone()).unwrap().for_each(|child_path| {
+        std::fs::read_dir(parent_path).unwrap().for_each(|child_path| {
             let path = match child_path {
                 Ok(path) => path.path(),
                 Err(_) => todo!(),
