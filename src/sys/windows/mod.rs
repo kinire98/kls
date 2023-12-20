@@ -81,7 +81,7 @@ struct Props {
     read_only: bool,
     hidden: bool,
     system: bool,
-    sparse_file: bool
+    reparse_file: bool
 }
 
 impl MetadataPath {
@@ -159,15 +159,15 @@ impl Props {
         if props != clone && !dir {
             file = true;
         }
-        props >>= 4;
-        clone = props >> 4;
-        let mut sparse_file = false;
+        props >>= 5;
+        clone >>= 5;
+        let mut reparse_file = false;
         props >>= 1;
         props <<= 1;
         if props != clone {
-            sparse_file = true;
+            reparse_file = true;
         }
-        Props { dir, file, read_only, hidden, system, sparse_file }
+        Props { dir, file, read_only, hidden, system, reparse_file }
     }
 }
 impl Display for Props {
@@ -177,6 +177,6 @@ impl Display for Props {
                 if self.read_only {'r'} else {'-'},
                 if self.hidden {'h'} else {'-'},
                 if self.system {'s'} else {'-'},
-                if self.sparse_file {'l'} else {'-'})
+                if self.reparse_file {'l'} else {'-'})
     }
 }
