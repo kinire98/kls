@@ -75,8 +75,12 @@ impl Dir {
         Ok(())
     }
     fn print_dir(&self, parent_path: PathBuf) -> Result<()> {
+        let mut parent_path_string = parent_path.display().to_string();
+        if parent_path_string.ends_with('/') || parent_path_string.ends_with('\\') {
+            parent_path_string.remove(parent_path_string.len() - 1);
+        }
         if self.recursive > 0 {
-            println!("{}", parent_path.display().to_string().on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
+            println!("{}", parent_path_string.on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
         }
         if self.all {
             self.print_file(".".into())?;
@@ -87,7 +91,7 @@ impl Dir {
                 Ok(path) => path.path(),
                 Err(_) => todo!(),
             };
-            let length_of_parent_path = parent_path.display().to_string().len() + 1;
+            let length_of_parent_path = parent_path_string.len() + 1;
             let mut to_print = path.display().to_string();
             if to_print.ends_with('~') && self.ignore_backups {
                 return;
