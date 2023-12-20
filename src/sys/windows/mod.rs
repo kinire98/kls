@@ -20,8 +20,6 @@ for example if is a hidden dir it would be:
 is dir -> 16 + hidden -> 2 = 18 -> hidden dir
 128 cannot be mixed
 
-
-
 This are the ones that Get-ChildItem displays
 d - Directory -> 16 -> bit 5
 a - Archive -> 32 -> bit 6
@@ -29,6 +27,8 @@ r - Read-only -> 1 -> bit 1
 h - Hidden -> 2 -> bit 2
 s - System -> 4 -> bit 3
 l - Reparse point, symlink, etc. -> 512 -> bit 10
+
+
 
 These are all that windows stores
 ReadOnly
@@ -69,7 +69,7 @@ use nt_time::{
 use std::{fs, time::{
     Duration,
     UNIX_EPOCH
-}};
+}, fmt::Display};
 use std::os::windows::prelude::*;
 use std::path::PathBuf;
 
@@ -78,7 +78,7 @@ use std::path::PathBuf;
 pub struct MetadataPath {
     path: PathBuf,
 }
-struct props {
+struct Props {
     dir: bool, 
     file: bool,
     read_only: bool,
@@ -116,6 +116,79 @@ impl MetadataPath {
         datetime.format("%Y-%m-%d %H:%M").to_string()
     }
     fn props_string(props: u32) -> String {
-        format!("{:b} {}", props, props)
+        Props::new(props).to_string()
+    }
+}
+
+impl Props {
+    fn new(props: u32) -> Self {
+        let mut clone = props;
+        let mut props = props;
+        let mut read_only = false;
+        props = props >> 1;
+        props = props << 1;
+        if props != clone {
+            read_only = true;
+        }
+        props = props >> 1;
+        clone = clone >> 1;
+        let mut hidden = false;
+        props = props >> 1;
+        props = props << 1;
+        if props != clone {
+            hidden = true;
+        }
+        props = props >> 1;
+        clone = clone >> 1;
+        let mut system = false;
+        props = props >> 1;
+        props = props << 1;
+        if props != clone {
+            system = true;
+        }
+        props = props >> 2;
+        clone = clone >> 2;
+        let mut dir = false;
+        props = props >> 1;
+        props = props << 1;
+        if props != clone {
+            dir = true;
+        }
+        props = props >> 1;
+        clone = clone >> 1;
+        let mut file = false; 
+        props = props >> 1;
+        props = props << 1;
+        if props != clone && !dir {
+            file = true;
+        }
+        props = props >> 4;
+        clone = props >> 4;
+        let mut sparse_file = false;
+        props = props >> 1;
+        props = props << 1;
+        if props != clone {
+            sparse_file = true;
+        }
+        Props { dir, file, read_only, hidden, system, sparse_file }
+    }
+}
+/*
+This are the ones that Get-ChildItem displays
+d - Directory -> 16 -> bit 5
+a - Archive -> 32 -> bit 6
+r - Read-only -> 1 -> bit 1
+h - Hidden -> 2 -> bit 2
+s - System -> 4 -> bit 3
+l - Reparse point, symlink, etc. -> 512 -> bit 10
+*/
+impl Display for Props {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}{}{}{}{}{}", if self.dir {'d'} else {'-'},
+                if self.file {'a'} else {'-'},
+                if self.read_only {'r'} else {'-'},
+                if self.hidden {'h'} else {'-'},
+                if self.system {'s'} else {'-'},
+                if self.sparse_file {'l'} else {'-'})
     }
 }

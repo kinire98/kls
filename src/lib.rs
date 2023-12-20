@@ -75,10 +75,12 @@ impl Dir {
         Ok(())
     }
     fn print_dir(&self, parent_path: PathBuf) -> Result<()> {
-        println!("{}", parent_path.display().to_string().on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
+        if self.recursive > 0 {
+            println!("{}", parent_path.display().to_string().on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
+        }
         if self.all {
-            print!("{} {}", ".".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing { "\n" } else { "" });
-            print!("{} {}", "..".on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing { "\n" } else { "" });
+            self.print_file(".".into())?;
+            self.print_file("..".into())?;
         }
         std::fs::read_dir(parent_path.clone()).unwrap().for_each(|child_path| {
             let path = match child_path {
@@ -113,6 +115,20 @@ impl Dir {
             }
         });
         println!();
+        Ok(())
+    }
+    fn print_file(&self, path: PathBuf) -> Result<()> {
+        let props = if self.long_listing {
+            self.long_listing(&path)
+        } else {
+            "".to_string()
+        };
+        let size = if self.size && !self.long_listing {
+            format!("{} ", self.size(&path))
+        } else {
+            "".to_string()
+        };
+        print!("{}{} {} {}", props, size, path.display().to_string().on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing {"\n"} else {""});
         Ok(())
     }
     fn long_listing(&self, path: &PathBuf) -> String {
