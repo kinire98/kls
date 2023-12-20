@@ -61,10 +61,7 @@ extern crate chrono;
 use chrono::prelude::DateTime;
 use chrono::Utc;
 
-use nt_time::{ 
-    FileTime,
-    time::OffsetDateTime
-};
+use nt_time::FileTime;
 
 use std::{fs, time::{
     Duration,
@@ -173,15 +170,6 @@ impl Props {
         Props { dir, file, read_only, hidden, system, sparse_file }
     }
 }
-/*
-This are the ones that Get-ChildItem displays
-d - Directory -> 16 -> bit 5
-a - Archive -> 32 -> bit 6
-r - Read-only -> 1 -> bit 1
-h - Hidden -> 2 -> bit 2
-s - System -> 4 -> bit 3
-l - Reparse point, symlink, etc. -> 512 -> bit 10
-*/
 impl Display for Props {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}{}{}{}{}{}", if self.dir {'d'} else {'-'},
