@@ -5,7 +5,7 @@
 ? Implmented
   -A, --almost-all           do not list implied . and ..
 ? Implemented
-  -B, --ignore-backups       do not list implied entries ending with ~ 
+  -B, --ignore-backups       do not list implied entries ending with ~
 ? Implemented
   -d, --directory            list directories themselves, not their contents
   -l                         use a long listing format
@@ -16,24 +16,18 @@
 */
 #![recursion_limit = "256"]
 
-
-
-
-
 pub mod error;
 use error::*;
 mod sys;
 use sys::*;
 
-use std::path::PathBuf;
 use colored::Colorize;
-
-
+use std::path::PathBuf;
 
 pub struct Dir {
     path: PathBuf,
     all: bool,
-    almost_all: bool, 
+    almost_all: bool,
     ignore_backups: bool,
     directories: bool,
     long_listing: bool,
@@ -50,7 +44,7 @@ impl Dir {
             directories: args.4,
             long_listing: args.5,
             size: args.6,
-            recursive: args.7
+            recursive: args.7,
         }
     }
     pub fn print(&mut self) -> Result<()> {
@@ -70,7 +64,8 @@ impl Dir {
             return Ok(());
         }
         std::fs::read_dir(path).unwrap().for_each(|child_path| {
-            self.print_recursive(child_path.unwrap().path(), recursion_times - 1).unwrap();
+            self.print_recursive(child_path.unwrap().path(), recursion_times - 1)
+                .unwrap();
         });
         Ok(())
     }
@@ -80,44 +75,73 @@ impl Dir {
             parent_path_string.remove(parent_path_string.len() - 1);
         }
         if self.recursive > 0 {
-            println!("{}", parent_path_string.on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold());
+            println!(
+                "{}",
+                parent_path_string
+                    .on_truecolor(100, 255, 100)
+                    .truecolor(50, 50, 255)
+                    .bold()
+            );
         }
         if self.all {
             self.print_file(".".into())?;
             self.print_file("..".into())?;
         }
-        std::fs::read_dir(parent_path).unwrap().for_each(|child_path| {
-            let path = match child_path {
-                Ok(path) => path.path(),
-                Err(_) => todo!(),
-            };
-            let length_of_parent_path = parent_path_string.len() + 1;
-            let mut to_print = path.display().to_string();
-            if to_print.ends_with('~') && self.ignore_backups {
-                return;
-            }
-            if to_print.chars().nth(length_of_parent_path).unwrap_or(' ') == '.' && !self.all && !self.almost_all {
-                return;
-            }
-            to_print = to_print[length_of_parent_path..].to_string();
-            let props = if self.long_listing {
-                self.long_listing(&path)
-            } else {
-                "".to_string()
-            };
-            let size = if self.size && !self.long_listing {
-                format!("{} ", self.size(&path))
-            } else {
-                "".to_string()
-            };
-            if path.is_file() {
-                if !self.directories {
-                    print!("{}{} {} {}", props, size, to_print.green(), if self.long_listing { "\n" } else { "" })
+        if parent_path.is_symlink() {
+            return Ok(());
+        }
+        std::fs::read_dir(parent_path)
+            .unwrap()
+            .for_each(|child_path| {
+                let path = match child_path {
+                    Ok(path) => path.path(),
+                    Err(_) => todo!(),
+                };
+                let length_of_parent_path = parent_path_string.len() + 1;
+                let mut to_print = path.display().to_string();
+                if to_print.ends_with('~') && self.ignore_backups {
+                    return;
                 }
-            } else {
-                print!("{}{} {} {}", props, size, to_print.on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing { "\n" } else { "" })
-            }
-        });
+                if to_print.chars().nth(length_of_parent_path).unwrap_or(' ') == '.'
+                    && !self.all
+                    && !self.almost_all
+                {
+                    return;
+                }
+                to_print = to_print[length_of_parent_path..].to_string();
+                let props = if self.long_listing {
+                    self.long_listing(&path)
+                } else {
+                    "".to_string()
+                };
+                let size = if self.size && !self.long_listing {
+                    format!("{} ", self.size(&path))
+                } else {
+                    "".to_string()
+                };
+                if path.is_file() {
+                    if !self.directories {
+                        print!(
+                            "{}{} {} {}",
+                            props,
+                            size,
+                            to_print.green(),
+                            if self.long_listing { "\n" } else { "" }
+                        )
+                    }
+                } else {
+                    print!(
+                        "{}{} {} {}",
+                        props,
+                        size,
+                        to_print
+                            .on_truecolor(100, 255, 100)
+                            .truecolor(50, 50, 255)
+                            .bold(),
+                        if self.long_listing { "\n" } else { "" }
+                    )
+                }
+            });
         println!();
         Ok(())
     }
@@ -132,7 +156,17 @@ impl Dir {
         } else {
             "".to_string()
         };
-        print!("{}{} {} {}", props, size, path.display().to_string().on_truecolor(100, 255, 100).truecolor(50, 50, 255).bold(), if self.long_listing {"\n"} else {""});
+        print!(
+            "{}{} {} {}",
+            props,
+            size,
+            path.display()
+                .to_string()
+                .on_truecolor(100, 255, 100)
+                .truecolor(50, 50, 255)
+                .bold(),
+            if self.long_listing { "\n" } else { "" }
+        );
         Ok(())
     }
     fn long_listing(&self, path: &PathBuf) -> String {
@@ -153,7 +187,4 @@ impl Dir {
             unix::MetadataPath::from(path.clone()).size()
         }
     }
-    
 }
-
-
