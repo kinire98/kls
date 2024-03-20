@@ -22,7 +22,7 @@ mod sys;
 use sys::*;
 
 use colored::Colorize;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub struct Dir {
     path: PathBuf,
@@ -169,22 +169,22 @@ impl Dir {
         );
         Ok(())
     }
-    fn long_listing(&self, path: &PathBuf) -> String {
+    fn long_listing(&self, path: &Path) -> String {
         let size = self.size(path);
         #[cfg(windows)]
-        let props = windows::MetadataPath::from(path.clone()).props();
+        let props = windows::MetadataPath::from(path.to_path_buf()).props();
         #[cfg(unix)]
-        let props = unix::MetadataPath::from(path.clone()).props();
+        let props = unix::MetadataPath::from(path.to_path_buf()).props();
         format!("{} {}", props, size)
     }
-    fn size(&self, path: &PathBuf) -> u64 {
+    fn size(&self, path: &Path) -> u64 {
         #[cfg(windows)]
         {
-            windows::MetadataPath::from(path.clone()).size()
+            windows::MetadataPath::from(path.to_path_buf()).size()
         }
         #[cfg(unix)]
         {
-            unix::MetadataPath::from(path.clone()).size()
+            unix::MetadataPath::from(path.to_path_buf()).size()
         }
     }
 }
